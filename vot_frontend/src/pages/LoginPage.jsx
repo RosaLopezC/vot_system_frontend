@@ -11,6 +11,7 @@ function LoginPage() {
   // ✅ Asegúrate de que REACT_APP_API_URL esté definido en el archivo .env
   const apiUrl = process.env.REACT_APP_API_URL;
   console.log('API URL:', apiUrl);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -19,19 +20,38 @@ function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        }
-      );
+      });
 
       const { token, user } = response.data;
 
+      // Guardar token y usuario en el localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error.response?.data || error.message);
-      Swal.fire('Error', 'Credenciales incorrectas', 'error');
+    // ✅ Debug: Verificar el rol recibido del backend
+    console.log('Rol del usuario:', user.rol); 
+    console.log('Usuario completo:', user); 
+
+    Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
+
+    // Redirigir según el rol (versión temporal con log)
+    if (user?.rol === 'superadmin') {
+      console.log('Redirigiendo a superadmin');
+      navigate('/dashboard/superadmin');
+    } else if (user?.rol === 'admin_local' || user?.rol === 'admin') {
+      console.log('Redirigiendo a admin');
+      navigate('/dashboard/admin');
+    } else if (user?.rol === 'supervisor') {
+      console.log('Redirigiendo a supervisor');
+      navigate('/dashboard/supervisor');
+    } else {
+      console.log('Redirigiendo a encargado (rol no reconocido)');
+      navigate('/dashboard/encargado');
+    }
+
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error.response?.data || error.message);
+    Swal.fire('Error', 'Credenciales incorrectas', 'error');
     }
   };
 
