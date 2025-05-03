@@ -29,8 +29,8 @@ function LoginPage() {
       localStorage.setItem('user', JSON.stringify(user));
 
     // ✅ Debug: Verificar el rol recibido del backend
-    console.log('Rol del usuario:', user.rol); 
-    console.log('Usuario completo:', user); 
+    //console.log('Rol del usuario:', user.rol); 
+    //console.log('Usuario completo:', user); 
 
     Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
 

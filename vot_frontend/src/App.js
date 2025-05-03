@@ -1,20 +1,53 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import Dashboard from './pages/Dashboard'; // Asegúrate de importar tu archivo de Dashboard (se asume que ya existe)
+import Dashboard from './pages/Dashboard';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta principal para login */}
+        {/* Ruta pública */}
         <Route path="/" element={<LoginPage />} />
 
-        {/* Rutas para los diferentes dashboards según el rol */}
-        <Route path="/dashboard/superadmin" element={<Dashboard role="superadmin" />} />
-        <Route path="/dashboard/admin" element={<Dashboard role="admin" />} />
-        <Route path="/dashboard/supervisor" element={<Dashboard role="supervisor" />} />
-        <Route path="/dashboard/encargado" element={<Dashboard role="encargado" />} />
+        {/* Rutas privadas */}
+        <Route 
+          path="/dashboard/superadmin" 
+          element={
+            <PrivateRoute 
+              element={<Dashboard role="superadmin" />} 
+              allowedRoles={['superadmin']} 
+            />
+          } 
+        />
+        <Route 
+          path="/dashboard/admin" 
+          element={
+            <PrivateRoute 
+              element={<Dashboard role="admin" />} 
+              allowedRoles={['admin', 'admin_local']} 
+            />
+          } 
+        />
+        <Route 
+          path="/dashboard/supervisor" 
+          element={
+            <PrivateRoute 
+              element={<Dashboard role="supervisor" />} 
+              allowedRoles={['supervisor']} 
+            />
+          } 
+        />
+        <Route 
+          path="/dashboard/encargado" 
+          element={
+            <PrivateRoute 
+              element={<Dashboard role="encargado" />} 
+              allowedRoles={['encargado']} 
+            />
+          } 
+        />
       </Routes>
     </Router>
   );
