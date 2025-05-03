@@ -8,14 +8,19 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  // ✅ Asegúrate de que REACT_APP_API_URL esté definido en el archivo .env
+  const apiUrl = process.env.REACT_APP_API_URL;
+  console.log('API URL:', apiUrl);
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/api/login/', {
-        email,
-        password
-      });
+      const response = await axios.post(`${apiUrl}/login/`, { email, password }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        }
+      );
 
       const { token, user } = response.data;
 
@@ -25,6 +30,7 @@ function LoginPage() {
       Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
       navigate('/dashboard');
     } catch (error) {
+      console.error('Error al iniciar sesión:', error.response?.data || error.message);
       Swal.fire('Error', 'Credenciales incorrectas', 'error');
     }
   };
@@ -53,7 +59,9 @@ function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button className="btn btn-primary w-100 mt-3" type="submit">Ingresar</button>
+        <button className="btn btn-primary w-100 mt-3" type="submit">
+          Ingresar
+        </button>
       </form>
     </div>
   );
