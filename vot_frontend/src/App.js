@@ -3,6 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
+import SupervisorDashboard from './pages/SupervisorDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 function App() {
   return (
@@ -16,7 +21,7 @@ function App() {
           path="/dashboard/superadmin" 
           element={
             <PrivateRoute 
-              element={<Dashboard role="superadmin" />} 
+              element={<SuperAdminDashboard />} 
               allowedRoles={['superadmin']} 
             />
           } 
@@ -25,7 +30,7 @@ function App() {
           path="/dashboard/admin" 
           element={
             <PrivateRoute 
-              element={<Dashboard role="admin" />} 
+              element={<AdminDashboard />} 
               allowedRoles={['admin', 'admin_local']} 
             />
           } 
@@ -34,7 +39,7 @@ function App() {
           path="/dashboard/supervisor" 
           element={
             <PrivateRoute 
-              element={<Dashboard role="supervisor" />} 
+              element={<SupervisorDashboard />} 
               allowedRoles={['supervisor']} 
             />
           } 
