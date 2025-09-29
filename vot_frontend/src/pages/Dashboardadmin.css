@@ -21,7 +21,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 280px;
-  background: white;
+  background: white !important; /* Agregar !important */
   color: #334155;
   padding: 0;
   position: fixed;
@@ -36,26 +36,23 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  padding: 24px 20px;
+  justify-content: center;
+  padding: 8px 16px;
   border-bottom: 1px solid #e2e8f0;
+  background: white !important; /* Agregar !important */
 }
 
 .logo-image {
-  width: 32px;
-  height: 32px;
-  margin-right: 12px;
+  width: auto; /* Cambiar de 32px a auto */
+  height: 120px; /* Aumentar altura */
+  max-width: 300px; /* Ancho máximo */
   object-fit: contain;
-}
-
-.logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1e293b;
 }
 
 /* Navegación */
 .nav-section {
   padding: 20px 0;
+  background: white !important; /* Agregar !important */
 }
 
 .nav-title {
@@ -125,7 +122,7 @@ body {
 
 /* Submenú */
 .submenu {
-  background: #f8fafc;
+  background: white !important;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
@@ -133,13 +130,15 @@ body {
 
 .submenu.open {
   max-height: 200px;
+  background: white !important;
 }
+
 
 .submenu-item {
   padding: 12px 20px 12px 52px;
   font-size: 13px;
-  color: #64748b;
-  background: none;
+  color: #1e293b !important; /* Color oscuro para buen contraste */
+  background: white !important;
   border: none;
   width: 100%;
   text-align: left;
@@ -148,10 +147,9 @@ body {
 }
 
 .submenu-item:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: #f1f5f9 !important; /* Fondo gris claro al hover */
+  color: #0f172a !important; /* Color aún más oscuro al hover */
 }
-
 /* Botón logout */
 .logout-btn {
   position: absolute;
@@ -859,6 +857,291 @@ body {
   color: #64748b;
 }
 
+/* Tabla personalizada */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 8px;
+}
+
+/* Configuración de columnas con ancho específico */
+.custom-table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 14px;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Definir anchos específicos para las columnas */
+.custom-table th:nth-child(1) { /* DNI */
+  width: 100px;
+}
+
+.custom-table th:nth-child(2), /* Nombres */
+.custom-table th:nth-child(3) { /* Apellidos */
+  width: 130px;
+}
+
+.custom-table th:nth-child(4) { /* Email */
+  width: 200px;
+}
+
+.custom-table th:nth-child(5) { /* Celular */
+  width: 120px;
+}
+
+.custom-table th:nth-child(6) { /* Supervisor/Acciones */
+  width: 150px;
+}
+
+.custom-table th:nth-child(7) { /* Acciones en tabla encargados */
+  width: 120px;
+}
+
+.custom-table th:first-child {
+  border-left: 1px solid #e2e8f0;
+  border-top-left-radius: 8px;
+}
+
+.custom-table th:last-child {
+  border-right: 1px solid #e2e8f0;
+  border-top-right-radius: 8px;
+}
+
+/* Estilo para las celdas */
+.custom-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 14px;
+  max-width: 200px; /* Ancho máximo para celdas */
+  white-space: nowrap; /* Evita saltos de línea */
+  overflow: hidden; /* Oculta contenido que excede */
+  text-overflow: ellipsis; /* Muestra ... para texto truncado */
+}
+
+/* Estilo específico para celdas con emails */
+.custom-table td.email-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-table td:first-child {
+  border-left: 1px solid #e2e8f0;
+}
+
+.custom-table td:last-child {
+  border-right: 1px solid #e2e8f0;
+}
+
+.custom-table tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.custom-table tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Tooltip para mostrar el texto completo al pasar el mouse */
+.custom-table td[title] {
+  cursor: default;
+}
+
+/* Mejoras para el contenedor de la tabla */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 24px 0;
+  overflow-x: auto; /* Permite scroll horizontal en dispositivos pequeños */
+}
+
+/* Mejoras para el encabezado de la tabla */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.table-header h2 {
+  font-size: 22px;
+  color: #2d3748;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Mejoras para el botón de crear */
+.create-button {
+  background-color: #10b981;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  margin-left: 16px; /* Agregar margen a la izquierda */
+}
+
+.create-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mejoras para la tabla */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 8px;
+}
+
+/* Configuración de columnas con ancho específico */
+.custom-table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 14px;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Definir anchos específicos para las columnas */
+.custom-table th:nth-child(1) { /* DNI */
+  width: 100px;
+}
+
+.custom-table th:nth-child(2), /* Nombres */
+.custom-table th:nth-child(3) { /* Apellidos */
+  width: 130px;
+}
+
+.custom-table th:nth-child(4) { /* Email */
+  width: 200px;
+}
+
+.custom-table th:nth-child(5) { /* Celular */
+  width: 120px;
+}
+
+.custom-table th:nth-child(6) { /* Supervisor/Acciones */
+  width: 150px;
+}
+
+.custom-table th:nth-child(7) { /* Acciones en tabla encargados */
+  width: 120px;
+}
+
+.custom-table th:first-child {
+  border-left: 1px solid #e2e8f0;
+  border-top-left-radius: 8px;
+}
+
+.custom-table th:last-child {
+  border-right: 1px solid #e2e8f0;
+  border-top-right-radius: 8px;
+}
+
+/* Estilo para las celdas */
+.custom-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 14px;
+  max-width: 200px; /* Ancho máximo para celdas */
+  white-space: nowrap; /* Evita saltos de línea */
+  overflow: hidden; /* Oculta contenido que excede */
+  text-overflow: ellipsis; /* Muestra ... para texto truncado */
+}
+
+/* Estilo específico para celdas con emails */
+.custom-table td.email-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-table td:first-child {
+  border-left: 1px solid #e2e8f0;
+}
+
+.custom-table td:last-child {
+  border-right: 1px solid #e2e8f0;
+}
+
+.custom-table tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.custom-table tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Tooltip para mostrar el texto completo al pasar el mouse */
+.custom-table td[title] {
+  cursor: default;
+}
+
+/* Mejoras para la columna de acciones */
+.actions-column {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  white-space: nowrap; /* Evita que los botones se apilen */
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button.edit {
+  background-color: #f1f5f9;
+}
+
+.action-button.delete {
+  background-color: #fee2e2;
+}
+
+.action-button.edit:hover {
+  background-color: #e2e8f0;
+}
+
+.action-button.delete:hover {
+  background-color: #fecaca;
+}
+
 /* Responsive Design */
 @media (max-width: 1600px) {
   .stats-grid {
@@ -1055,5 +1338,13 @@ body {
   
   .devices-chart, .devices-chart-improved {
     height: 180px;
+  }
+}
+
+/* Responsive para la tabla */
+@media (max-width: 1024px) {
+  .custom-table {
+    display: block;
+    overflow-x: auto;
   }
 }
