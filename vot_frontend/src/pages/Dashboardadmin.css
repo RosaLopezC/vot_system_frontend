@@ -1142,7 +1142,120 @@ body {
   background-color: #fecaca;
 }
 
-/* Responsive Design */
+/* Estilos para la fila del medio con los dos gráficos principales - Modificar estas propiedades */
+.middle-row-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+/* Ajuste para ambos cards, asegurando misma altura */
+.middle-chart {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Asegurar que nada sobresalga */
+}
+
+/* Ajustes específicos para el gráfico de dona */
+.donut-chart-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0 !important; /* Eliminar padding extra */
+  overflow: hidden !important; /* Asegurar que nada sobresalga */
+}
+
+/* Contenedor del gráfico de dona */
+.donut-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Alinear al inicio */
+  flex: 1;
+  position: relative;
+  height: calc(100% - 60px); /* Altura total menos altura del título */
+}
+
+/* Ajustar el tamaño del container de Recharts para el gráfico de dona */
+.donut-container .recharts-responsive-container {
+  height: 65% !important; /* Porcentaje de la altura disponible */
+  width: 100% !important;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Información debajo del gráfico de dona */
+.donut-bottom-info {
+  text-align: center;
+  width: 100%;
+  position: relative;
+  height: 35%; /* Resto de la altura disponible */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.donut-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.donut-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 5px 0 10px;
+}
+
+/* Leyenda del gráfico de dona - más compacta */
+.donut-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .middle-row-charts {
+    grid-template-columns: 1fr; /* En pantallas pequeñas, apilar verticalmente */
+  }
+  
+  .donut-chart-card {
+    max-width: 100%; /* En pantallas pequeñas, usar todo el ancho disponible */
+  }
+}
+
+@media (max-width: 1400px) {
+  .middle-row-charts {
+    grid-template-columns: 1.8fr 1fr; /* Mantener proporción similar */
+  }
+}
+
 @media (max-width: 1600px) {
   .stats-grid {
     grid-template-columns: 2fr 2fr 2fr 2.5fr;

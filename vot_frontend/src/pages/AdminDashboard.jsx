@@ -30,11 +30,11 @@ axios.interceptors.request.use(
 );
 
 const AdminDashboard = () => {
-  // Simulación de usuario
-  const user = {
-    nombres: 'Userprueba',
-    dni: '00123456'
-  };
+  // Reemplazar la simulación de usuario con estado real
+  const [user, setUser] = useState({
+    nombres: '',
+    dni: ''
+  });
 
   // Estados para el manejo de datos
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -418,6 +418,55 @@ const AdminDashboard = () => {
     }
   };
 
+  // Función para obtener la información del usuario loggeado
+  const fetchUserInfo = () => {
+    try {
+      // Obtener usuario del localStorage
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        // Si no hay información en localStorage, obtener del token
+        const token = localStorage.getItem('token');
+        if (token) {
+          // Decodificar el token JWT si contiene la información del usuario
+          try {
+            const tokenData = JSON.parse(atob(token.split('.')[1]));
+            if (tokenData.user) {
+              setUser(tokenData.user);
+              // Guardar en localStorage para futuros accesos
+              localStorage.setItem('user', JSON.stringify(tokenData.user));
+            } else {
+              // Si el token no contiene la información del usuario, hacer una petición
+              fetchUserFromBackend();
+            }
+          } catch (error) {
+            console.error("Error al decodificar token:", error);
+            fetchUserFromBackend();
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error al obtener información del usuario:", error);
+    }
+  };
+
+  // Función para obtener usuario del backend
+  const fetchUserFromBackend = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/usuarios/me/');
+      if (response.status === 200) {
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      }
+    } catch (error) {
+      console.error("Error al obtener usuario del backend:", error);
+      // Si falla todo, redirigir al login
+      handleLogout();
+    }
+  };
+
   // Cargar datos según la sección activa
   useEffect(() => {
     if (activeSection === 'usuarios-supervisores') {
@@ -425,6 +474,9 @@ const AdminDashboard = () => {
     } else if (activeSection === 'usuarios-encargados') {
       fetchEncargados();
     }
+
+    // Llamar a fetchUserInfo al cargar el componente
+    fetchUserInfo();
   }, [activeSection]);
 
   return (
@@ -562,6 +614,7 @@ const AdminDashboard = () => {
 
         {activeSection === 'dashboard' && (
           <>
+            {/* Primera fila - Stats cards */}
             <div className="stats-grid">
               <div className="stat-card reports">
                 <div className="stat-info">
@@ -613,8 +666,43 @@ const AdminDashboard = () => {
                   <div className="calendar-day">13</div>
                 </div>
               </div>
+            </div>
+
+            {/* Segunda fila - Gráficos principales */}
+            <div className="middle-row-charts">
+              {/* Gráfico de líneas de Reportes Mensuales */}
+              <div className="chart-card middle-chart">
+                <h3 className="chart-title">Reportes Mensuales</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={reportesMensuales}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="mes"
+                      tick={{ fill: '#6b7280' }}
+                      tickLine={{ stroke: '#e5e7eb' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      tick={{ fill: '#6b7280' }}
+                      tickLine={{ stroke: '#e5e7eb' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      width={40}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line
+                      type="monotone"
+                      dataKey="reportes"
+                      stroke="#f59e0b" 
+                      strokeWidth={3}
+                      dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, fill: '#f59e0b' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
               
-              <div className="chart-card large-chart donut-chart-card">
+              {/* Gráfico de dona de Número total de reportes */}
+              <div className="chart-card middle-chart donut-chart-card">
                 <div className="chart-header">
                   <h3 className="chart-title">Número total de reportes</h3>
                 </div>
@@ -658,6 +746,7 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+            {/* Tercera fila - Información detallada */}
             <div className="bottom-charts-grid">
               <div className="chart-card fixed-height-chart">
                 <h3 className="chart-title">Reportes por distrito</h3>
@@ -755,37 +844,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Gráfico de líneas agregado aquí */}
-            <div className="chart-card">
-              <h3 className="chart-title">Reportes Mensuales</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={reportesMensuales}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="mes"
-                    tick={{ fill: '#6b7280' }}
-                    tickLine={{ stroke: '#e5e7eb' }}
-                    axisLine={{ stroke: '#e5e7eb' }}
-                  />
-                  <YAxis 
-                    tick={{ fill: '#6b7280' }}
-                    tickLine={{ stroke: '#e5e7eb' }}
-                    axisLine={{ stroke: '#e5e7eb' }}
-                    width={40}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="reportes"
-                    stroke="#f59e0b" 
-                    strokeWidth={3}
-                    dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: '#f59e0b' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
             </div>
           </>
         )}
