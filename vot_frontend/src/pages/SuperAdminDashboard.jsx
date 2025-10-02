@@ -9,7 +9,7 @@ import {
 import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Swal from 'sweetalert2';
 import axios from 'axios';
-import api from '../utils/api'; // Add this line
+import { api } from '../utils/api';  // Cambia esta línea
 import './Dashboardsuperadmin.css';
 
 const SuperAdminDashboard = () => {

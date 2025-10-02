@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -16,6 +17,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import { api } from '../utils/api';
 
 // Configuración de Axios para incluir el token en los headers
 axios.interceptors.request.use(
@@ -30,6 +32,7 @@ axios.interceptors.request.use(
 );
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
   // Reemplazar la simulación de usuario con estado real
   const [user, setUser] = useState({
     nombres: '',
@@ -47,7 +50,7 @@ const AdminDashboard = () => {
   const [modalType, setModalType] = useState('');
   
   // Estados adicionales para mostrar/ocultar listas
-  const [showAllSupervisors, setShowAllSupervisors] = useState(false);
+  const [showAllSupervisores, setShowAllSupervisores] = useState(false);
   const [showAllEncargados, setShowAllEncargados] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -362,64 +365,8 @@ const AdminDashboard = () => {
     setLoading(false);
   };
 
-  // Función para cargar supervisores
-  const fetchSupervisores = async () => {
-    try {
-      const res = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
-      setSupervisores(res.data);
-    } catch (err) {
-      console.error('Error al obtener supervisores:', err);
-    }
-  };
-
-  // Función para cargar encargados
-  const fetchEncargados = async () => {
-    try {
-      // Primero obtenemos los encargados
-      const resEncargados = await axios.get('http://localhost:8000/api/usuarios/encargados/');
-      console.log("Encargados recibidos:", resEncargados.data); // Para depuración
-    
-      // Luego obtenemos los supervisores para poder mapear IDs a nombres
-      const resSupervisores = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
-      console.log("Supervisores recibidos:", resSupervisores.data); // Para depuración
-    
-      // Creamos un mapa de ID de supervisor a nombre completo
-      const supervisoresMap = {};
-      resSupervisores.data.forEach(supervisor => {
-        supervisoresMap[supervisor.id] = `${supervisor.nombres} ${supervisor.apellidos}`;
-      });
-      console.log("Mapa de supervisores:", supervisoresMap); // Para depuración
-    
-      // Ahora podemos transformar los datos de encargados para incluir el nombre del supervisor
-      const encargadosConNombresSupervisores = resEncargados.data.map(encargado => {
-        console.log("Encargado:", encargado.id, "Supervisor ID:", encargado.supervisor); // Para depuración
-        return {
-          ...encargado,
-          supervisor_nombre: encargado.supervisor && supervisoresMap[encargado.supervisor] 
-            ? supervisoresMap[encargado.supervisor] 
-            : 'Sin asignar'
-        };
-      });
-      
-      console.log("Encargados procesados:", encargadosConNombresSupervisores); // Para depuración
-      setEncargados(encargadosConNombresSupervisores);
-    } catch (err) {
-      console.error('Error al obtener encargados:', err);
-    }
-  };
-
-  // Agregar esta función para cargar los supervisores disponibles
-  const fetchSupervisoresParaSelect = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
-      setSupervisoresDisponibles(response.data);
-    } catch (error) {
-      console.error('Error al cargar supervisores:', error);
-    }
-  };
-
-  // Función para obtener la información del usuario loggeado
-  const fetchUserInfo = () => {
+  // Función para obtener la información del usuario
+  const fetchUserInfo = async () => {
     try {
       // Obtener usuario del localStorage
       const storedUser = localStorage.getItem('user');
@@ -467,6 +414,84 @@ const AdminDashboard = () => {
     }
   };
 
+  // Función para obtener supervisores
+  const fetchSupervisores = useCallback(async () => {
+    try {
+        setLoading(true);
+        const response = await api.getSupervisors();
+        console.log('Response data:', response.data); // Debug
+        
+        if (Array.isArray(response.data)) {
+            setSupervisores(response.data);
+        } else {
+            console.error('Unexpected response format:', response.data);
+            setSupervisores([]);
+        }
+    } catch (error) {
+        console.error('Error fetching supervisors:', error);
+        if (error.response?.status === 401) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Sesión expirada',
+                text: 'Por favor, inicie sesión nuevamente'
+            }).then(() => {
+                navigate('/login');
+            });
+        } else {
+            Swal.fire('Error', 'No se pudieron cargar los supervisores', 'error');
+        }
+        setSupervisores([]);
+    } finally {
+        setLoading(false);
+    }
+  }, [navigate]);
+
+  // Función para cargar encargados
+  const fetchEncargados = async () => {
+    try {
+      // Primero obtenemos los encargados
+      const resEncargados = await axios.get('http://localhost:8000/api/usuarios/encargados/');
+      console.log("Encargados recibidos:", resEncargados.data); // Para depuración
+    
+      // Luego obtenemos los supervisores para poder mapear IDs a nombres
+      const resSupervisores = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
+      console.log("Supervisores recibidos:", resSupervisores.data); // Para depuración
+    
+      // Creamos un mapa de ID de supervisor a nombre completo
+      const supervisoresMap = {};
+      resSupervisores.data.forEach(supervisor => {
+        supervisoresMap[supervisor.id] = `${supervisor.nombres} ${supervisor.apellidos}`;
+      });
+      console.log("Mapa de supervisores:", supervisoresMap); // Para depuración
+    
+      // Ahora podemos transformar los datos de encargados para incluir el nombre del supervisor
+      const encargadosConNombresSupervisores = resEncargados.data.map(encargado => {
+        console.log("Encargado:", encargado.id, "Supervisor ID:", encargado.supervisor); // Para depuración
+        return {
+          ...encargado,
+          supervisor_nombre: encargado.supervisor && supervisoresMap[encargado.supervisor] 
+            ? supervisoresMap[encargado.supervisor] 
+            : 'Sin asignar'
+        };
+      });
+      
+      console.log("Encargados procesados:", encargadosConNombresSupervisores); // Para depuración
+      setEncargados(encargadosConNombresSupervisores);
+    } catch (err) {
+      console.error('Error al obtener encargados:', err);
+    }
+  };
+
+  // Agregar esta función para cargar los supervisores disponibles
+  const fetchSupervisoresParaSelect = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
+      setSupervisoresDisponibles(response.data);
+    } catch (error) {
+      console.error('Error al cargar supervisores:', error);
+    }
+  };
+
   // Cargar datos según la sección activa
   useEffect(() => {
     if (activeSection === 'usuarios-supervisores') {
@@ -478,6 +503,15 @@ const AdminDashboard = () => {
     // Llamar a fetchUserInfo al cargar el componente
     fetchUserInfo();
   }, [activeSection]);
+
+  // useEffect con dependencias corregidas
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]); // Agregada la dependencia
+
+  useEffect(() => {
+    fetchSupervisores();
+  }, []); // Este efecto solo se ejecuta al montar el componente
 
   return (
     <div className="dashboard-container">
@@ -777,7 +811,7 @@ const AdminDashboard = () => {
               <div className="chart-card fixed-height-chart">
                 <h3 className="chart-title">Supervisores activos ahora</h3>
                 <div className="supervisor-list">
-                  {supervisoresActivos.slice(0, showAllSupervisors ? supervisoresActivos.length : 4).map((supervisor, i) => (
+                  {supervisoresActivos.slice(0, showAllSupervisores ? supervisoresActivos.length : 4).map((supervisor, i) => (
                     <div key={i} className="supervisor-item">
                       <span className="supervisor-name">{supervisor}</span>
                     </div>
@@ -785,9 +819,9 @@ const AdminDashboard = () => {
                   {supervisoresActivos.length > 4 && (
                     <button
                       className="show-more-btn"
-                      onClick={() => setShowAllSupervisors(!showAllSupervisors)}
+                      onClick={() => setShowAllSupervisores(!showAllSupervisores)}
                     >
-                      {showAllSupervisors ? 'Mostrar menos' : `Mostrar ${supervisoresActivos.length - 4} más`}
+                      {showAllSupervisores ? 'Mostrar menos' : `Mostrar ${supervisoresActivos.length - 4} más`}
                     </button>
                   )}
                 </div>
@@ -1019,7 +1053,7 @@ const AdminDashboard = () => {
             <td>{supervisor.nombres}</td>
             <td>{supervisor.apellidos}</td>
             <td className="email-cell" title={supervisor.email}>{supervisor.email}</td>
-            <td>{supervisor.celular}</td>
+            <td>{supervisor.celular || 'No registrado'}</td>
             <td className="actions-column">
               <button 
                 className="action-button edit"

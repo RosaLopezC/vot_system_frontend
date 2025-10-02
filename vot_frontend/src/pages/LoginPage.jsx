@@ -14,51 +14,36 @@ function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://31.97.91.123/api/login/', {
-        dni,
-        password
-      });
+        const response = await axios.post('http://31.97.91.123/api/login/', {
+            dni,
+            password
+        });
 
-      // Agregar logs para ver la respuesta completa
-      console.log('Respuesta completa del login:', response.data);
-      console.log('Token de acceso:', response.data.access);
-      console.log('Token de refresh:', response.data.refresh);
-      console.log('Datos del usuario:', response.data.user);
+        // Debug para verificar la respuesta
+        console.log('Token recibido:', response.data.access);
+        
+        // Guardar token
+        localStorage.setItem('accessToken', response.data.access);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      // Guardar tokens y datos del usuario
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      if (remember) {
-        localStorage.setItem('remember', 'true');
-      } else {
-        localStorage.removeItem('remember');
-      }
+        // Redireccionar según el rol
+        const user = response.data.user;
+        if (user.rol === 'superadmin') {
+          navigate('/dashboard/superadmin');
+        } else if (user.rol === 'admin' || user.rol === 'admin_local') {
+          navigate('/dashboard/admin');
+        } else if (user.rol === 'supervisor') {
+          navigate('/dashboard/supervisor');
+        } else if (user.rol === 'encargado') {
+          navigate('/dashboard/encargado');
+        } else {
+          navigate('/dashboard');
+        }
 
-      const user = response.data.user;
-      
-      // Redireccionar según el rol
-      if (user.rol === 'superadmin') {
-        navigate('/dashboard/superadmin');
-      } else if (user.rol === 'admin' || user.rol === 'admin_local') {
-        navigate('/dashboard/admin');
-      } else if (user.rol === 'supervisor') {
-        navigate('/dashboard/supervisor');
-      } else if (user.rol === 'encargado') {
-        navigate('/dashboard/encargado');
-      } else {
-        navigate('/dashboard');
-      }
-
-      Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
+        Swal.fire('Bienvenido', `Hola ${user.nombres}`, 'success');
     } catch (error) {
-      console.error('Error detallado del login:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      Swal.fire('Error', error.response?.data?.detail || 'Error al iniciar sesión', 'error');
+        console.error('Error de login:', error);
+        Swal.fire('Error', error.response?.data?.detail || 'Error al iniciar sesión', 'error');
     }
   };
 

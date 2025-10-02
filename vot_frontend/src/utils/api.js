@@ -1,34 +1,32 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = 'http://31.97.91.123/api';
 
 export const api = {
-  // Companies
-  getCompanies: () => axios.get(`${API_URL}/companies`),
-  createCompany: (data) => axios.post(`${API_URL}/companies`, data),
-  updateCompany: (id, data) => axios.put(`${API_URL}/companies/${id}`, data),
-  deleteCompany: (id) => axios.delete(`${API_URL}/companies/${id}`),
-
-  // Users
-  getUsers: () => axios.get(`${API_URL}/users`),
-  createUser: (data) => axios.post(`${API_URL}/users`, data),
-  updateUser: (id, data) => axios.put(`${API_URL}/users/${id}`, data),
-  deleteUser: (id) => axios.delete(`${API_URL}/users/${id}`),
-
-  // Reports
-  getReports: (filters) => axios.get(`${API_URL}/reports`, { params: filters }),
-  updateReport: (id, data) => axios.put(`${API_URL}/reports/${id}`, data),
-  deleteReport: (id) => axios.delete(`${API_URL}/reports/${id}`),
-
-  // Districts
-  getDistricts: () => axios.get(`${API_URL}/districts`),
-  createDistrict: (data) => axios.post(`${API_URL}/districts`, data),
-  updateDistrict: (id, data) => axios.put(`${API_URL}/districts/${id}`, data),
-  deleteDistrict: (id) => axios.delete(`${API_URL}/districts/${id}`),
-
-  // Auth
-  loginWithDni: ({ dni, password }) =>
-    axios.post(`${API_URL}/auth/login-dni`, { dni, password })
+    getSupervisors: async () => {
+        const token = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.get(`${API_URL}/usuarios/supervisores/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('API Response:', response); // Debug
+            return response;
+        } catch (error) {
+            console.error('API Error:', error.response || error);
+            throw error;
+        }
+    },
+    updateSupervisor: async (id, data) => {
+        const token = localStorage.getItem('accessToken');
+        const response = await axios.put(`${API_URL}/usuarios/supervisor/${id}/`, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response;
+    }
 };
-
-export default api;
