@@ -32,6 +32,8 @@ axios.interceptors.request.use(
 );
 
 const AdminDashboard = () => {
+    console.log("AdminDashboard se está renderizando"); // Debug log
+    
     const navigate = useNavigate();
   // Reemplazar la simulación de usuario con estado real
   const [user, setUser] = useState({
@@ -604,8 +606,12 @@ const AdminDashboard = () => {
     fetchSupervisores();
   }, []); // Este efecto solo se ejecuta al montar el componente
 
+  // Agrega también este log en el return
+  console.log("AdminDashboard está retornando JSX"); // Debug log
+  
   return (
     <div className="dashboard-container">
+      {console.log("Renderizando div principal")} {/* Debug log temporal */}
       {/* Sidebar */}
       <div className="sidebar">
         <div className="logo">

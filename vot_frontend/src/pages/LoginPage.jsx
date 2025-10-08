@@ -3,7 +3,8 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
-function LoginPage() {
+// ⚠️ IMPORTANTE: Recibe las props que App.js está enviando
+function LoginPage({ setIsAuthenticated, setUserRole }) {
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -22,18 +23,22 @@ function LoginPage() {
         // Debug para verificar la respuesta
         console.log('Token recibido:', response.data.access);
         
-        // Guardar token
-        localStorage.setItem('accessToken', response.data.access);
+        // ⚠️ CORREGIR: Guardar con la clave correcta que usa App.js
+        localStorage.setItem('token', response.data.access); // Cambiar 'accessToken' por 'token'
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
-        // Redireccionar según el rol
+        // ⚠️ CRÍTICO: Actualizar el estado global
         const user = response.data.user;
+        setIsAuthenticated(true);    // Esta línea era la que faltaba
+        setUserRole(user.rol);       // Esta línea era la que faltaba
+
+        // Redireccionar según el rol
         if (user.rol === 'superadmin') {
           navigate('/dashboard/superadmin');
         } else if (user.rol === 'admin' || user.rol === 'admin_local') {
-          navigate('/dashboard/admin');
+          navigate('/admin');
         } else if (user.rol === 'supervisor') {
-          navigate('/dashboard/supervisor');
+          navigate('/supervisor');
         } else if (user.rol === 'encargado') {
           navigate('/dashboard/encargado');
         } else {
