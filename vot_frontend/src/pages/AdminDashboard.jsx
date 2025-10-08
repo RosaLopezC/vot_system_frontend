@@ -340,29 +340,99 @@ const AdminDashboard = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:8000/api/usuarios/supervisor/', supervisorForm);
-      Swal.fire('Éxito', 'El supervisor fue creado correctamente.', 'success');
+      // Usa solo los campos requeridos según la API
+      const supervisorData = {
+        dni: supervisorForm.dni,
+        nombres: supervisorForm.nombres,
+        apellidos: supervisorForm.apellidos,
+        email: supervisorForm.email,
+        password: supervisorForm.password
+      };
+      
+      // Agrega el celular si existe
+      if (supervisorForm.celular) {
+        supervisorData.celular = supervisorForm.celular;
+      }
+      
+      await api.createSupervisor(supervisorData);
+      
+      // Mensaje de éxito
+      alert('Supervisor creado correctamente');
       setShowModal(false);
-      fetchSupervisores(); // Recargar la lista de supervisores
+      
+      // Resetea el formulario
+      setSupervisorForm({
+        dni: '',
+        nombres: '',
+        apellidos: '',
+        email: '',
+        celular: '',
+        empresa: '',
+        estado_contrasena: 'por_defecto',
+        estado: 'activo',
+        password: ''
+      });
+      
+      // Recarga la lista de supervisores
+      fetchSupervisores();
     } catch (err) {
-      Swal.fire('Error', err.response?.data?.detail || 'No se pudo crear el supervisor.', 'error');
+      console.error("Error al crear supervisor:", err);
+      alert(`Error al crear supervisor: ${err.response?.data?.detail || 'Error desconocido'}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Función para crear un encargado
   const handleCrearEncargado = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
-      await axios.post('http://localhost:8000/api/usuarios/encargado/', encargadoForm);
-      Swal.fire('Éxito', 'El encargado fue creado correctamente.', 'success');
+      // Preparar los datos requeridos por la API
+      const encargadoData = {
+        dni: encargadoForm.dni,
+        nombres: encargadoForm.nombres,
+        apellidos: encargadoForm.apellidos,
+        email: encargadoForm.email,
+        password: encargadoForm.password,
+        supervisor: encargadoForm.supervisor
+      };
+      
+      // Agregar campos opcionales si existen
+      if (encargadoForm.celular) {
+        encargadoData.celular = encargadoForm.celular;
+      }
+      
+      // Llamar a la API para crear el encargado
+      await api.createEncargado(encargadoData);
+      
+      // Mostrar mensaje de éxito
+      alert('Encargado creado correctamente');
       setShowModal(false);
-      fetchEncargados(); // Recargar la lista de encargados
+      
+      // Resetear el formulario
+      setEncargadoForm({
+        dni: '',
+        nombres: '',
+        apellidos: '',
+        email: '',
+        celular: '',
+        empresa: '',
+        supervisor: '',
+        estado_contrasena: 'por_defecto',
+        estado: 'activo',
+        password: ''
+      });
+      
+      // Recargar la lista de encargados
+      fetchEncargados();
     } catch (err) {
-      Swal.fire('Error', err.response?.data?.detail || 'No se pudo crear el encargado.', 'error');
+      console.error("Error al crear encargado:", err);
+      alert(`Error al crear encargado: ${err.response?.data?.detail || 'Error desconocido'}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Función para obtener la información del usuario
@@ -419,26 +489,19 @@ const AdminDashboard = () => {
     try {
         setLoading(true);
         const response = await api.getSupervisors();
-        console.log('Response data:', response.data); // Debug
         
-        if (Array.isArray(response.data)) {
-            setSupervisores(response.data);
+        if (response && response.data) {
+          setSupervisores(response.data);
         } else {
-            console.error('Unexpected response format:', response.data);
-            setSupervisores([]);
+          console.error('Formato de respuesta inesperado:', response);
+          setSupervisores([]);
         }
     } catch (error) {
-        console.error('Error fetching supervisors:', error);
+        console.error('Error al obtener supervisores:', error);
         if (error.response?.status === 401) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Sesión expirada',
-                text: 'Por favor, inicie sesión nuevamente'
-            }).then(() => {
-                navigate('/login');
-            });
-        } else {
-            Swal.fire('Error', 'No se pudieron cargar los supervisores', 'error');
+          // Manejo de sesión expirada
+          localStorage.removeItem('accessToken');
+          navigate('/login');
         }
         setSupervisores([]);
     } finally {
@@ -449,24 +512,22 @@ const AdminDashboard = () => {
   // Función para cargar encargados
   const fetchEncargados = async () => {
     try {
-      // Primero obtenemos los encargados
-      const resEncargados = await axios.get('http://localhost:8000/api/usuarios/encargados/');
-      console.log("Encargados recibidos:", resEncargados.data); // Para depuración
-    
-      // Luego obtenemos los supervisores para poder mapear IDs a nombres
-      const resSupervisores = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
-      console.log("Supervisores recibidos:", resSupervisores.data); // Para depuración
-    
-      // Creamos un mapa de ID de supervisor a nombre completo
+      setLoading(true);
+      
+      // Usar la función de la API para obtener encargados
+      const resEncargados = await api.getEncargados();
+      
+      // Obtener los supervisores para mapear sus nombres
+      const resSupervisores = await api.getSupervisors();
+      
+      // Crear un mapa de ID de supervisor a nombre completo
       const supervisoresMap = {};
       resSupervisores.data.forEach(supervisor => {
         supervisoresMap[supervisor.id] = `${supervisor.nombres} ${supervisor.apellidos}`;
       });
-      console.log("Mapa de supervisores:", supervisoresMap); // Para depuración
-    
-      // Ahora podemos transformar los datos de encargados para incluir el nombre del supervisor
+      
+      // Transformar los datos de encargados para incluir el nombre del supervisor
       const encargadosConNombresSupervisores = resEncargados.data.map(encargado => {
-        console.log("Encargado:", encargado.id, "Supervisor ID:", encargado.supervisor); // Para depuración
         return {
           ...encargado,
           supervisor_nombre: encargado.supervisor && supervisoresMap[encargado.supervisor] 
@@ -475,20 +536,28 @@ const AdminDashboard = () => {
         };
       });
       
-      console.log("Encargados procesados:", encargadosConNombresSupervisores); // Para depuración
       setEncargados(encargadosConNombresSupervisores);
-    } catch (err) {
-      console.error('Error al obtener encargados:', err);
+    } catch (error) {
+      console.error('Error al obtener encargados:', error);
+      if (error.response?.status === 401) {
+        // Manejo de sesión expirada
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+      }
+      setEncargados([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Agregar esta función para cargar los supervisores disponibles
+  // Actualiza la función para usar la API
   const fetchSupervisoresParaSelect = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/usuarios/supervisores/');
+      const response = await api.getSupervisors();
       setSupervisoresDisponibles(response.data);
     } catch (error) {
       console.error('Error al cargar supervisores:', error);
+      setSupervisoresDisponibles([]);
     }
   };
 
