@@ -389,14 +389,24 @@ const AdminDashboard = () => {
     setLoading(true);
     
     try {
-      // Preparar los datos requeridos por la API
+      // Verificamos que todos los campos obligatorios estén completos
+      const camposRequeridos = ['dni', 'nombres', 'apellidos', 'email', 'password', 'supervisor'];
+      const camposFaltantes = camposRequeridos.filter(campo => !encargadoForm[campo]);
+      
+      if (camposFaltantes.length > 0) {
+        Swal.fire('Error', `Faltan campos obligatorios: ${camposFaltantes.join(', ')}`, 'error');
+        setLoading(false);
+        return;
+      }
+      
+      // Preparar los datos requeridos por la API, asegurando que supervisor sea un número
       const encargadoData = {
         dni: encargadoForm.dni,
         nombres: encargadoForm.nombres,
         apellidos: encargadoForm.apellidos,
         email: encargadoForm.email,
         password: encargadoForm.password,
-        supervisor: encargadoForm.supervisor
+        supervisor: parseInt(encargadoForm.supervisor)
       };
       
       // Agregar campos opcionales si existen
@@ -404,11 +414,13 @@ const AdminDashboard = () => {
         encargadoData.celular = encargadoForm.celular;
       }
       
+      console.log("Datos que se envían:", encargadoData); // Depuración
+      
       // Llamar a la API para crear el encargado
       await api.createEncargado(encargadoData);
       
       // Mostrar mensaje de éxito
-      alert('Encargado creado correctamente');
+      Swal.fire('Éxito', 'Encargado creado correctamente', 'success');
       setShowModal(false);
       
       // Resetear el formulario
@@ -429,7 +441,8 @@ const AdminDashboard = () => {
       fetchEncargados();
     } catch (err) {
       console.error("Error al crear encargado:", err);
-      alert(`Error al crear encargado: ${err.response?.data?.detail || 'Error desconocido'}`);
+      // Mostrar el mensaje de error detallado
+      Swal.fire('Error', `Error: ${err.response?.data?.detail || JSON.stringify(err.response?.data) || 'No se pudo crear el encargado'}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -514,25 +527,27 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Usar la función de la API para obtener encargados
+      // Obtener encargados
       const resEncargados = await api.getEncargados();
       
-      // Obtener los supervisores para mapear sus nombres
+      // Obtener supervisores para mapear IDs a nombres
       const resSupervisores = await api.getSupervisors();
       
       // Crear un mapa de ID de supervisor a nombre completo
       const supervisoresMap = {};
-      resSupervisores.data.forEach(supervisor => {
-        supervisoresMap[supervisor.id] = `${supervisor.nombres} ${supervisor.apellidos}`;
-      });
+      if (resSupervisores.data && Array.isArray(resSupervisores.data)) {
+        resSupervisores.data.forEach(supervisor => {
+          supervisoresMap[supervisor.id] = `${supervisor.nombres} ${supervisor.apellidos}`;
+        });
+      }
       
-      // Transformar los datos de encargados para incluir el nombre del supervisor
+      // Transformar los datos para incluir el nombre del supervisor
       const encargadosConNombresSupervisores = resEncargados.data.map(encargado => {
         return {
           ...encargado,
           supervisor_nombre: encargado.supervisor && supervisoresMap[encargado.supervisor] 
             ? supervisoresMap[encargado.supervisor] 
-            : 'Sin asignar'
+            : `Sin asignar (ID: ${encargado.supervisor})`
         };
       });
       
@@ -541,8 +556,15 @@ const AdminDashboard = () => {
       console.error('Error al obtener encargados:', error);
       if (error.response?.status === 401) {
         // Manejo de sesión expirada
-        localStorage.removeItem('accessToken');
-        navigate('/login');
+        Swal.fire({
+          icon: 'error',
+          title: 'Sesión expirada',
+          text: 'Por favor, inicie sesión nuevamente'
+        }).then(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('accessToken');
+          navigate('/login');
+        });
       }
       setEncargados([]);
     } finally {
